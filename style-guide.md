@@ -17,7 +17,6 @@ Desktop:
 - width: 360px
 - height: 360px
 
-
 ### Padding | Margin
 8px | 32px
 
@@ -25,17 +24,12 @@ Desktop:
 
 ### Main color is dependent on temperature
 - 40deg: Light blue rgb(120, 239, 255)
-- 55deg: Blue rgb(75, 75, 255)
+- 50-60deg: Blue rgb(75, 75, 255)
 - 70deg: Green rgb(30, 154, 49)
-- 85deg: Yellow rgb(255, 225, 92)
+- 80-90deg: Yellow rgb(255, 225, 92)
 - 100deg: Red rgb(176, 26, 26)
 
-Background gradient color:
-- Purple-gray: rgba(77, 77, 101, 0.7)
-
-### Background color's hue is dependent on current hour
-- Darkest = 0:00 = rgba(128, 128, 128);
-- Brightest = 12:00 = white
+- Background gradient color: Purple-gray: rgba(77, 77, 101, 0.7)
 
 ### Font colors
 - white
@@ -45,6 +39,7 @@ Background gradient color:
 ## Typography
 
 ### Font
+Default fonts from React template
 
 ### Sizes
 14px | 20px | 24px | 36px | 60px
