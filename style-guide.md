@@ -23,13 +23,12 @@ Desktop:
 ## Colors
 
 ### Main color is dependent on temperature
-- 40deg: Light blue rgb(120, 239, 255)
-- 50-60deg: Blue rgb(75, 75, 255)
-- 70deg: Green rgb(30, 154, 49)
-- 80-90deg: Yellow rgb(255, 225, 92)
-- 100deg: Red rgb(176, 26, 26)
+- 40deg: Blue rgb(199, 206, 234)
+- 50-60deg: Light blue rgb(181, 234, 215)
+- 70deg: Green rgb(226, 240, 203)
+- 80-90deg: Yellow rgb(255, 218, 193)
+- 100deg: Red rgb(255, 183, 178)
 
-- Background gradient color: Purple-gray: rgba(77, 77, 101, 0.7)
 
 ### Font colors
 - white

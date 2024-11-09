@@ -35,6 +35,13 @@ h3 {
   line-height: 1.5;
 }
 
+.flex-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
 .flex-row {
   display: flex;
   justify-content: space-between;
