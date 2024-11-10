@@ -38,12 +38,11 @@ export default function WeatherCard() {
     }, []);
 
     async function getCurrentPositionSuccess(pos: GeolocationPosition) {
-        await setCurrentLocation([pos.coords.latitude, pos.coords.longitude]);
+        await setCurrentLocation(pos.coords.latitude, pos.coords.longitude);
         await getWeatherInformation(pos.coords.latitude, pos.coords.longitude);
     }
 
-    async function setCurrentLocation(coords: number[]) {
-        const [latitude, longitude] = coords
+    async function setCurrentLocation(latitude: number, longitude: number) {
         const APIkey = process.env.REACT_APP_REVERSE_GEO_API_KEY;
         const url = `https://api.opencagedata.com/geocode/v1/json?q=${latitude},${longitude}&key=${APIkey}`;
         fetch(url)
@@ -63,7 +62,7 @@ export default function WeatherCard() {
         })
         .catch(error => {
             setLocationErr(true);
-            setLocation(coords.join(', '));
+            setLocation(latitude + ", " + longitude);
         });
     }
 
