@@ -2,8 +2,8 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import WeatherCard from './WeatherCard';
 
-test('renders date', () => {
+test('renders loading oval', () => {
     render(<WeatherCard />);
-    const headerElement = screen.getByText(/Wednesday, Oct 16/i);
-    expect(headerElement).toBeInTheDocument();
+    const loadingElement = screen.getByLabelText("oval-loading");
+    expect(loadingElement).toBeInTheDocument();
 });
