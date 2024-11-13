@@ -11,6 +11,7 @@ Features considered to be added:
 
 Code Cleanup To-do:
 - Create custom hooks for calling API
+- Fix HourlyRow component: forwardRef (deprecated)
 
 ## Project Screen Shot(s)
 
