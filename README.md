@@ -1,46 +1,33 @@
-# Getting Started with Create React App
+## Weather Today
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Simple React app for checking the weather today currently and hourly. Uses OpenMeteo for weather data, and OpenCageData for location name. 
 
-## Available Scripts
+## Project Status
+Basic version is complete. The user is able to give the application permission to grab the location coordinates (longitude and latitude), and the application grabs location name and weather data through 3rd party API's. Once the data is loaded, the user is then able to check the current weather as well as the hourly weather (temperature and precipitation percentage) during the day. 
 
-In the project directory, you can run:
+Features considered to be added:
+- Details about the weather using weather code (storms, etc)
+- Ability to look at weather from the past (not sure how far back hourly data is provided from OpenMeteo)
 
-### `npm start`
+Code Cleanup To-do:
+- Create custom hooks for calling API
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+## Project Screen Shot(s)
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+![Weather for Wednesday, November 13 displayed for Washington, DC.](./img/screenshot.png)
 
-### `npm test`
+## Installation and Setup Instructions
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- `npm install`  
+- `npm start`  
+- Visit `localhost:3000` 
 
-### `npm run build`
+## Reflection
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+This was a side project to practice React and fetching data from API's. There was also a bit of brushing up on CSS involved. It was difficult at first to come up with the design because I wasn't completely sure what the shape of the data I was getting from OpenMeteo looked like. I took inspiration from the iPhone weather app, although it came out very different.
+    
+I also had to learn how to grab the user's location data as well as reverse geocoding. It was hard figuring out where (& when) I should be making the API calls. Through useEffect, I grabbed the user's location coordinates once the WeatherCard component mounted and then used that data to call the reverse geocoding API and OpenMeteo to fetch location name/weather data. All of the calls were done on WeatherCard component because I wanted all the data to show at once when they were ready.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+I wanted the current hour's weather data to be readily viewable to the user when the application first rendered the data, so I made the HourlyCard scrollbox component scroll to the current hour - this was difficult to implement because I hadn't yet learned to store elements as Refs, especially when rendering a list of the same component from an array of data. I learned about forwardRef, a utility function that allows a parent component's ref to be assigned to a child - however, I also just learned that it will be deprecated going forward with functional components. Refs can now be passed to a child component by including ref when declaring a child component function (like one does with props).
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-### `npm run eject`
-
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
-
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
-
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
-
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
+I learned to create custom hooks for API calls after completing the basic version of this project, so that is something I would like to implement next. There were a couple cool data points from OpenMeteo I didn't utilize in the project that I think would make it more helpful for users, such as weather codes (provides detailed info on the weather like storms)
