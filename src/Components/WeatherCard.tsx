@@ -35,7 +35,7 @@ export default function WeatherCard() {
             } 
             });
         } 
-    }, []);
+    });
 
     async function getCurrentPositionSuccess(pos: GeolocationPosition) {
         await setCurrentLocation(pos.coords.latitude, pos.coords.longitude);

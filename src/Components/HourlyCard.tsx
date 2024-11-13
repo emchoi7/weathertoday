@@ -10,7 +10,7 @@ export default function HourlyCard(props: { hourlyTemps: Array<HourlyTempObject>
         if(currentRef.current) {
             currentRef.current.scrollIntoView();
         }
-    }, [currentRef.current]);
+    }, []);
 
     let hourlyRows = props.hourlyTemps.map((hourlyTemp, i) => <HourlyRow key={i} time={hourlyTemp.time} temp={hourlyTemp.temp} preProb={hourlyTemp.preProb} ref={currentRef} />);
 
