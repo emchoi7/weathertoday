@@ -41,27 +41,28 @@ export default function WeatherCard() {
             await setCurrentLocation(pos.coords.latitude, pos.coords.longitude);
             await getWeatherInformation(pos.coords.latitude, pos.coords.longitude);
         }
+
+        async function setCurrentLocation(latitude: number, longitude: number) {
+            const APIkey = process.env.REACT_APP_REVERSE_GEO_API_KEY;
+            const url = `https://api.opencagedata.com/geocode/v1/json?q=${latitude},${longitude}&key=${APIkey}`;
+            fetchLocation(url, {});
+        }
+    
+        async function getWeatherInformation(latitude: number, longitude: number) {
+            const params = {
+                "latitude": latitude,
+                "longitude": longitude,
+                "current": "temperature_2m",
+                "hourly": ["temperature_2m", "precipitation_probability"],
+                "temperature_unit": "fahrenheit",
+            };
+            const url = "https://api.open-meteo.com/v1/forecast";
+            fetchWeather(url, params, fetchWeatherApi, (res:any) => Promise.resolve(res[0]));
+        }
     }, []);
 
     // TODO: geolocation error callback
 
-    async function setCurrentLocation(latitude: number, longitude: number) {
-        const APIkey = process.env.REACT_APP_REVERSE_GEO_API_KEY;
-        const url = `https://api.opencagedata.com/geocode/v1/json?q=${latitude},${longitude}&key=${APIkey}`;
-        fetchLocation(url, {});
-    }
-
-    async function getWeatherInformation(latitude: number, longitude: number) {
-        const params = {
-            "latitude": latitude,
-            "longitude": longitude,
-            "current": "temperature_2m",
-            "hourly": ["temperature_2m", "precipitation_probability"],
-            "temperature_unit": "fahrenheit",
-        };
-        const url = "https://api.open-meteo.com/v1/forecast";
-        fetchWeather(url, params, fetchWeatherApi, (res:any) => Promise.resolve(res[0]));
-    }
 
     let locationComponent;
 
