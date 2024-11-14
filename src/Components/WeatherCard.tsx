@@ -1,5 +1,6 @@
-import React, {useState, useEffect} from 'react';
+import { useEffect, useRef } from 'react';
 import { fetchWeatherApi } from 'openmeteo';
+import { useApi } from '../Hooks/useApi';
 
 import './WeatherCard.css';
 
@@ -15,12 +16,11 @@ export type HourlyTempObject = {
 }
 
 export default function WeatherCard() {
-    const [currentTemp, setCurrentTemp] = useState<number | null>(null);
-    const [hourlyTemps, setHourlyTemps] = useState<Array<HourlyTempObject> | null>(null);
 
-    const [locationErr, setLocationErr] = useState<Boolean>(false);
-    const [location, setLocation] = useState<String | null>(null);
+    const [locationData, isLoadingLocation, locationErr, fetchLocation] = useApi();
+    const [weatherData, isLoadingWeather, weatherErr, fetchWeather] = useApi();
 
+    const coordsRef = useRef<GeolocationCoordinates>();
     const currDate = new Date(Date.now());
 
     useEffect(() => {
@@ -37,7 +37,10 @@ export default function WeatherCard() {
         } 
     }, []);
 
+    // TODO: geolocation error callback
+
     async function getCurrentPositionSuccess(pos: GeolocationPosition) {
+        coordsRef.current = pos.coords;
         await setCurrentLocation(pos.coords.latitude, pos.coords.longitude);
         await getWeatherInformation(pos.coords.latitude, pos.coords.longitude);
     }
@@ -45,25 +48,7 @@ export default function WeatherCard() {
     async function setCurrentLocation(latitude: number, longitude: number) {
         const APIkey = process.env.REACT_APP_REVERSE_GEO_API_KEY;
         const url = `https://api.opencagedata.com/geocode/v1/json?q=${latitude},${longitude}&key=${APIkey}`;
-        fetch(url)
-        .then(res => res.json())
-        .then(data => {
-          if(data.status.code === 200) {
-            let currLocation = data.results[0].formatted;
-            const locationStringArray = currLocation.split(',');
-            if(locationStringArray[locationStringArray.length - 1] === " United States of America") {
-                currLocation = locationStringArray.slice(2,4).join().split(' ').slice(1,3).join(' ');
-            } 
-            setLocationErr(false);
-            setLocation(currLocation);
-          } else {
-            throw new Error(data.status.code + ' Error');
-          }
-        })
-        .catch(error => {
-            setLocationErr(true);
-            setLocation(latitude + ", " + longitude);
-        });
+        fetchLocation(url, {});
     }
 
     async function getWeatherInformation(latitude: number, longitude: number) {
@@ -75,15 +60,51 @@ export default function WeatherCard() {
             "temperature_unit": "fahrenheit",
         };
         const url = "https://api.open-meteo.com/v1/forecast";
-        const responses = await fetchWeatherApi(url, params);
-        const response = responses[0];
-    
-        const utcOffsetSeconds = response.utcOffsetSeconds();
-    
-        const current = response.current();
-        const hourly = response.hourly();
+        fetchWeather(url, params, fetchWeatherApi, (res:any) => Promise.resolve(res[0]));
+    }
 
-        const newCurrentTemp = current?.variables(0)!.value() ?? 0;
+    let locationComponent;
+
+    if(locationData && !locationComponent) {
+        let currLocation: string = "";
+        if(locationData.status.code === 200) {
+            currLocation = locationData.results[0].formatted;
+            const locationStringArray = currLocation.split(',');
+            if(locationStringArray[locationStringArray.length - 1] === " United States of America") {
+                currLocation = locationStringArray.slice(2,4).join().split(' ').slice(1,3).join(' ');
+            }
+            locationComponent = <Location err={false}>{currLocation}</Location>
+        } else {
+            locationComponent = <Location err={true}>{coordsRef.current?.latitude + ", " + coordsRef.current?.longitude}</Location>
+        }
+    } else if(locationErr && !locationComponent) {
+        locationComponent = <Location err={true}>""</Location>
+    }
+
+    let bgColorClassName: string = "";
+    let currTempComponent;
+    let hourlyCardComponent;
+
+    if(weatherData && !(currTempComponent&&hourlyCardComponent)) {
+    
+        const utcOffsetSeconds = weatherData.utcOffsetSeconds();
+    
+        const current = weatherData.current();
+        const hourly = weatherData.hourly();
+
+        const currentTemp = current?.variables(0)!.value() ?? 0;
+        currTempComponent = <h1>{Math.round(currentTemp)}&deg;</h1>;
+        if (currentTemp < 40) {
+            bgColorClassName = " cold";
+        } else if (currentTemp < 55) {
+            bgColorClassName = " cool";
+        } else if (currentTemp < 70) {
+            bgColorClassName = " room";
+        }  else if (currentTemp < 85) {
+            bgColorClassName = " warm";
+        }  else if (currentTemp >= 85) {
+            bgColorClassName = " hot";
+        }
     
         const range = (start: number, end: number, step: number) => Array.from({length: (end - start) / step}, (_,i) => start + i * step);
         const hourlyTime = range(Number(hourly?.time()), Number(hourly?.timeEnd()), Number(hourly?.interval())).map(t => new Date((t + utcOffsetSeconds) * 1000));
@@ -104,46 +125,36 @@ export default function WeatherCard() {
             });
         }
 
-        setCurrentTemp(Math.round(newCurrentTemp));
-        setHourlyTemps(newHourlyTemps);
+        hourlyCardComponent = <HourlyCard hourlyTemps={newHourlyTemps} error={false}/>;
+    } else if (weatherErr && !(currTempComponent&&hourlyCardComponent)) {
+        currTempComponent = <h2 className="error">There was an error fetching the weather data.</h2>;
+        hourlyCardComponent = <HourlyCard hourlyTemps={[]} error />
     }
 
-    let bgColorClassName: string = "";
+    let cardContent;
 
-    if(currentTemp) {
-        if (currentTemp < 40) {
-            bgColorClassName = " cold";
-        } else if (currentTemp < 55) {
-            bgColorClassName = " cool";
-        } else if (currentTemp < 70) {
-            bgColorClassName = " room";
-        }  else if (currentTemp < 85) {
-            bgColorClassName = " warm";
-        }  else if (currentTemp >= 85) {
-            bgColorClassName = " hot";
-        }
+    if(!coordsRef.current || isLoadingLocation || isLoadingWeather) {
+        cardContent = <Oval
+            visible={true}
+            height="80"
+            width="80"
+            strokeWidth="8"
+            color="white"
+            secondaryColor="black"
+            ariaLabel="oval-loading"
+            wrapperStyle={{}}
+            wrapperClass=""
+        />
+    } else {
+        cardContent = <div>
+            <h3>{currDate.toUTCString().slice(0,11)}</h3>
+            {locationComponent}
+            {currTempComponent}
+            {hourlyCardComponent}
+        </div>
     }
 
     return <div className={"weather-card flex-column" + bgColorClassName}>
-        
-        {currentTemp && location && hourlyTemps 
-            ? <div>
-                    <h3>{currDate.toUTCString().slice(0,11)}</h3>
-                    <Location err={locationErr}>{location}</Location>
-                    <h1>{currentTemp}&deg;</h1>
-                    <HourlyCard hourlyTemps={hourlyTemps}/></div>
-                
-            : <Oval
-                visible={true}
-                height="80"
-                width="80"
-                strokeWidth="8"
-                color="white"
-                secondaryColor="black"
-                ariaLabel="oval-loading"
-                wrapperStyle={{}}
-                wrapperClass=""
-            />}
-
+        {cardContent}
     </div>
 }
