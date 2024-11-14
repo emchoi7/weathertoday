@@ -35,15 +35,15 @@ export default function WeatherCard() {
             } 
             });
         } 
-    }, [getCurrentPositionSuccess]);
+
+        async function getCurrentPositionSuccess(pos: GeolocationPosition) {
+            coordsRef.current = pos.coords;
+            await setCurrentLocation(pos.coords.latitude, pos.coords.longitude);
+            await getWeatherInformation(pos.coords.latitude, pos.coords.longitude);
+        }
+    }, []);
 
     // TODO: geolocation error callback
-
-    async function getCurrentPositionSuccess(pos: GeolocationPosition) {
-        coordsRef.current = pos.coords;
-        await setCurrentLocation(pos.coords.latitude, pos.coords.longitude);
-        await getWeatherInformation(pos.coords.latitude, pos.coords.longitude);
-    }
 
     async function setCurrentLocation(latitude: number, longitude: number) {
         const APIkey = process.env.REACT_APP_REVERSE_GEO_API_KEY;
