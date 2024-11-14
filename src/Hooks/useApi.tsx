@@ -1,24 +1,24 @@
 import { useState, useCallback } from 'react';
 
 export function useApi() {
-    const [res, setRes] = useState<any>(null);
+    const [data, setData] = useState<any>(null);
     const [isLoading, setIsLoading] = useState<Boolean>(false);
     const [error, setError] = useState<any>(null);
 
-    async function fetchApi (url: string, options: any, fetchFcn: Function = fetch) {
+    function defaultProcessResponse(res: Response) {
+        return res.json();
+    }
+
+    async function fetchApi (url: string, options: any, fetchFcn: Function = fetch, processResponse: Function = defaultProcessResponse) {
         setIsLoading(true);
         try {
             let response = await fetchFcn(url, options);
-            // if(fetchFcn == fetch) {
-            //     response = response.json();
-            // }
-            // console.log(response.data)
-            setRes(response);
+            setData(processResponse(response));
         } catch(err:any) {
             setError(err);
         }
         setIsLoading(false);
     }
 
-    return [res, isLoading, error, fetchApi];
+    return [data, isLoading, error, fetchApi];
 }

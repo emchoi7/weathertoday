@@ -17,8 +17,8 @@ export type HourlyTempObject = {
 
 export default function WeatherCard() {
 
-    const [locationRes, isLoadingLocation, locationErr, fetchLocation] = useApi();
-    const [weatherRes, isLoadingWeather, weatherErr, fetchWeather] = useApi();
+    const [locationData, isLoadingLocation, locationErr, fetchLocation] = useApi();
+    const [weatherData, isLoadingWeather, weatherErr, fetchWeather] = useApi();
 
     const coordsRef = useRef<GeolocationCoordinates>();
 
@@ -61,16 +61,16 @@ export default function WeatherCard() {
             "temperature_unit": "fahrenheit",
         };
         const url = "https://api.open-meteo.com/v1/forecast";
-        fetchWeather(url, params, fetchWeatherApi);
+        fetchWeather(url, params, fetchWeatherApi, (res:any) => res[0]);
     }
     let locationComponent;
 
-    if(locationRes) {
-        const data = locationRes;
+    if(locationData) {
         let currLocation: string = "";
+        console.log(locationData);
         // if(data.status.code === 200) {
-        if(data.status === 200) {
-            currLocation = data.results[0].formatted;
+        if(locationData.status === 200) {
+            currLocation = locationData.results[0].formatted;
             const locationStringArray = currLocation.split(',');
             if(locationStringArray[locationStringArray.length - 1] === " United States of America") {
                 currLocation = locationStringArray.slice(2,4).join().split(' ').slice(1,3).join(' ');
@@ -87,13 +87,12 @@ export default function WeatherCard() {
     let currTempComponent;
     let hourlyCardComponent;
 
-    if(weatherRes) {
-        const response = weatherRes[0];
+    if(weatherData) {
     
-        const utcOffsetSeconds = response.utcOffsetSeconds();
+        const utcOffsetSeconds = weatherData.utcOffsetSeconds();
     
-        const current = response.current();
-        const hourly = response.hourly();
+        const current = weatherData.current();
+        const hourly = weatherData.hourly();
 
         const currentTemp = current?.variables(0)!.value() ?? 0;
         currTempComponent = <h1>{Math.round(currentTemp)}&deg;</h1>;
@@ -135,7 +134,7 @@ export default function WeatherCard() {
     }
 
     return <div className={"weather-card flex-column" + bgColorClassName}>
-        {weatherRes && locationRes
+        {weatherData && locationData
             ? <div>
                 <h3>{currDate.toUTCString().slice(0,11)}</h3>
                 {locationComponent}
