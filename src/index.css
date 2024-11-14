@@ -63,3 +63,8 @@ h3 {
 .scroll-container {
   overflow-y: scroll;
 }
+
+.error {
+  background-color: red;
+  color: white;
+}

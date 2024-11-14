@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react';
 import { HourlyTempObject } from './WeatherCard';
 import HourlyRow from './HourlyRow';
 
-export default function HourlyCard(props: { hourlyTemps: Array<HourlyTempObject> }) {
+export default function HourlyCard(props: { hourlyTemps: Array<HourlyTempObject>, error: Boolean }) {
 
     const currentRef = useRef<HTMLDivElement>(null);
 
@@ -12,9 +12,13 @@ export default function HourlyCard(props: { hourlyTemps: Array<HourlyTempObject>
         }
     }, []);
 
-    let hourlyRows = props.hourlyTemps.map((hourlyTemp, i) => <HourlyRow key={i} time={hourlyTemp.time} temp={hourlyTemp.temp} preProb={hourlyTemp.preProb} ref={currentRef} />);
-
-    return <div className="hourly-card">
+    let hourlyRows;
+    if(!props.error) {
+        hourlyRows = props.hourlyTemps.map((hourlyTemp, i) => <HourlyRow key={i} time={hourlyTemp.time} temp={hourlyTemp.temp} preProb={hourlyTemp.preProb} ref={currentRef} />);
+    } else {
+        <h3 className="error">There was an error fetching weather data.</h3>
+    }
+    return <div className={"hourly-card" + props.error ? " error" : ""}>
             <div className="flex-row label">
                 <div className="flex-item"><p>Hour</p></div>
                 <div className="flex-item"><p>Temp</p></div>
