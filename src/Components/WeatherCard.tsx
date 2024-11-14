@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef, RefObject} from 'react';
+import { useEffect, useRef } from 'react';
 import { fetchWeatherApi } from 'openmeteo';
 import { useApi } from '../Hooks/useApi';
 
@@ -21,7 +21,6 @@ export default function WeatherCard() {
     const [weatherData, isLoadingWeather, weatherErr, fetchWeather] = useApi();
 
     const coordsRef = useRef<GeolocationCoordinates>();
-
     const currDate = new Date(Date.now());
 
     useEffect(() => {
@@ -61,15 +60,14 @@ export default function WeatherCard() {
             "temperature_unit": "fahrenheit",
         };
         const url = "https://api.open-meteo.com/v1/forecast";
-        fetchWeather(url, params, fetchWeatherApi, (res:any) => res[0]);
+        fetchWeather(url, params, fetchWeatherApi, (res:any) => Promise.resolve(res[0]));
     }
+
     let locationComponent;
 
-    if(locationData) {
+    if(locationData && !locationComponent) {
         let currLocation: string = "";
-        console.log(locationData);
-        // if(data.status.code === 200) {
-        if(locationData.status === 200) {
+        if(locationData.status.code === 200) {
             currLocation = locationData.results[0].formatted;
             const locationStringArray = currLocation.split(',');
             if(locationStringArray[locationStringArray.length - 1] === " United States of America") {
@@ -79,7 +77,7 @@ export default function WeatherCard() {
         } else {
             locationComponent = <Location err={true}>{coordsRef.current?.latitude + ", " + coordsRef.current?.longitude}</Location>
         }
-    } else if(locationErr) {
+    } else if(locationErr && !locationComponent) {
         locationComponent = <Location err={true}>""</Location>
     }
 
@@ -87,7 +85,7 @@ export default function WeatherCard() {
     let currTempComponent;
     let hourlyCardComponent;
 
-    if(weatherData) {
+    if(weatherData && !(currTempComponent&&hourlyCardComponent)) {
     
         const utcOffsetSeconds = weatherData.utcOffsetSeconds();
     
@@ -128,30 +126,35 @@ export default function WeatherCard() {
         }
 
         hourlyCardComponent = <HourlyCard hourlyTemps={newHourlyTemps} error={false}/>;
-    } else if (weatherErr) {
+    } else if (weatherErr && !(currTempComponent&&hourlyCardComponent)) {
         currTempComponent = <h2 className="error">There was an error fetching the weather data.</h2>;
         hourlyCardComponent = <HourlyCard hourlyTemps={[]} error />
     }
 
-    return <div className={"weather-card flex-column" + bgColorClassName}>
-        {weatherData && locationData
-            ? <div>
-                <h3>{currDate.toUTCString().slice(0,11)}</h3>
-                {locationComponent}
-                {currTempComponent}
-                {hourlyCardComponent}
-            </div>
-            : <Oval
-                visible={true}
-                height="80"
-                width="80"
-                strokeWidth="8"
-                color="white"
-                secondaryColor="black"
-                ariaLabel="oval-loading"
-                wrapperStyle={{}}
-                wrapperClass=""
-            />}
+    let cardContent;
 
+    if(!coordsRef.current || isLoadingLocation || isLoadingWeather) {
+        cardContent = <Oval
+            visible={true}
+            height="80"
+            width="80"
+            strokeWidth="8"
+            color="white"
+            secondaryColor="black"
+            ariaLabel="oval-loading"
+            wrapperStyle={{}}
+            wrapperClass=""
+        />
+    } else {
+        cardContent = <div>
+            <h3>{currDate.toUTCString().slice(0,11)}</h3>
+            {locationComponent}
+            {currTempComponent}
+            {hourlyCardComponent}
+        </div>
+    }
+
+    return <div className={"weather-card flex-column" + bgColorClassName}>
+        {cardContent}
     </div>
 }
