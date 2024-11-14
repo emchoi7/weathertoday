@@ -59,7 +59,7 @@ export default function WeatherCard() {
             const url = "https://api.open-meteo.com/v1/forecast";
             fetchWeather(url, params, fetchWeatherApi, (res:any) => Promise.resolve(res[0]));
         }
-    }, []);
+    }, [fetchWeather, fetchLocation]);
 
     // TODO: geolocation error callback
 

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 
 export function useApi() {
     const [data, setData] = useState<any>(null);
@@ -9,7 +9,7 @@ export function useApi() {
         return await res.json();
     }
 
-    async function fetchApi (url: string, options: any, fetchFcn: Function = fetch, processResponse: Function = defaultProcessResponse) {
+    const fetchApi = useCallback(async (url: string, options: any, fetchFcn: Function = fetch, processResponse: Function = defaultProcessResponse) => {
         setIsLoading(true);
         try {
             const response = await fetchFcn(url, options);
@@ -19,7 +19,7 @@ export function useApi() {
             setError(err);
         }
         setIsLoading(false);
-    }
+    }, []);
 
     return [data, isLoading, error, fetchApi];
 }
