@@ -16,11 +16,6 @@ export type HourlyTempObject = {
 }
 
 export default function WeatherCard() {
-    const [currentTemp, setCurrentTemp] = useState<number | null>(null);
-    const [hourlyTemps, setHourlyTemps] = useState<Array<HourlyTempObject> | null>(null);
-
-    // const [locationErr, setLocationErr] = useState<Boolean>(false);
-    const [location, setLocation] = useState<String | null>(null);
 
     const [locationRes, isLoadingLocation, locationErr, fetchLocation] = useApi();
     const [weatherRes, isLoadingWeather, weatherErr, fetchWeather] = useApi();
@@ -41,7 +36,7 @@ export default function WeatherCard() {
             } 
             });
         } 
-    }), [];
+    }, []);
 
     // TODO: geolocation error callback
 
@@ -68,30 +63,13 @@ export default function WeatherCard() {
         const url = "https://api.open-meteo.com/v1/forecast";
         fetchWeather(url, params, fetchWeatherApi);
     }
-
-    let bgColorClassName: string = "";
-
-    if(currentTemp) {
-        if (currentTemp < 40) {
-            bgColorClassName = " cold";
-        } else if (currentTemp < 55) {
-            bgColorClassName = " cool";
-        } else if (currentTemp < 70) {
-            bgColorClassName = " room";
-        }  else if (currentTemp < 85) {
-            bgColorClassName = " warm";
-        }  else if (currentTemp >= 85) {
-            bgColorClassName = " hot";
-        }
-    }
-
     let locationComponent;
 
     if(locationRes) {
-        console.log(locationRes)
-        const data = locationRes.result;
+        const data = locationRes;
         let currLocation: string = "";
-        if(data.status.code === 200) {
+        // if(data.status.code === 200) {
+        if(data.status === 200) {
             currLocation = data.results[0].formatted;
             const locationStringArray = currLocation.split(',');
             if(locationStringArray[locationStringArray.length - 1] === " United States of America") {
@@ -105,6 +83,7 @@ export default function WeatherCard() {
         locationComponent = <Location err={true}>""</Location>
     }
 
+    let bgColorClassName: string = "";
     let currTempComponent;
     let hourlyCardComponent;
 
@@ -116,8 +95,19 @@ export default function WeatherCard() {
         const current = response.current();
         const hourly = response.hourly();
 
-        const newCurrentTemp = current?.variables(0)!.value() ?? 0;
-        currTempComponent = <h1>{currentTemp}&deg;</h1>;
+        const currentTemp = current?.variables(0)!.value() ?? 0;
+        currTempComponent = <h1>{Math.round(currentTemp)}&deg;</h1>;
+        if (currentTemp < 40) {
+            bgColorClassName = " cold";
+        } else if (currentTemp < 55) {
+            bgColorClassName = " cool";
+        } else if (currentTemp < 70) {
+            bgColorClassName = " room";
+        }  else if (currentTemp < 85) {
+            bgColorClassName = " warm";
+        }  else if (currentTemp >= 85) {
+            bgColorClassName = " hot";
+        }
     
         const range = (start: number, end: number, step: number) => Array.from({length: (end - start) / step}, (_,i) => start + i * step);
         const hourlyTime = range(Number(hourly?.time()), Number(hourly?.timeEnd()), Number(hourly?.interval())).map(t => new Date((t + utcOffsetSeconds) * 1000));
@@ -138,15 +128,14 @@ export default function WeatherCard() {
             });
         }
 
-        hourlyCardComponent = <HourlyCard hourlyTemps={hourlyTemps} error={false}/>;
+        hourlyCardComponent = <HourlyCard hourlyTemps={newHourlyTemps} error={false}/>;
     } else if (weatherErr) {
-        currTempComponent = <h2 className="error">There was an error fetching weather data.</h2>;
+        currTempComponent = <h2 className="error">There was an error fetching the weather data.</h2>;
         hourlyCardComponent = <HourlyCard hourlyTemps={[]} error />
     }
 
     return <div className={"weather-card flex-column" + bgColorClassName}>
-        
-        {currentTemp && location && hourlyTemps 
+        {weatherRes && locationRes
             ? <div>
                 <h3>{currDate.toUTCString().slice(0,11)}</h3>
                 {locationComponent}

@@ -12,7 +12,8 @@ export function useApi() {
             // if(fetchFcn == fetch) {
             //     response = response.json();
             // }
-            setRes(response.data);
+            // console.log(response.data)
+            setRes(response);
         } catch(err:any) {
             setError(err);
         }
