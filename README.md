@@ -1,4 +1,4 @@
-## (Weather Today)[https://eugene-weathertoday.netlify.app/]
+## [Weather Today](https://eugene-weathertoday.netlify.app/)
 
 Simple React app for checking the weather today currently and hourly. Uses OpenMeteo for weather data, and OpenCageData for location name. 
 
