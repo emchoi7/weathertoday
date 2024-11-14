@@ -35,7 +35,7 @@ export default function WeatherCard() {
             } 
             });
         } 
-    }, []);
+    }, [getCurrentPositionSuccess]);
 
     // TODO: geolocation error callback
 
