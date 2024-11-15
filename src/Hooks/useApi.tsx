@@ -21,27 +21,5 @@ export function useApi() {
         setIsLoading(false);
     }, []);
 
-    return [data, isLoading, error, fetchApi];
+    return [data, isLoading, error, setError, fetchApi];
 }
-
-// const APIkey = process.env.REACT_APP_REVERSE_GEO_API_KEY;
-// const url = `https://api.opencagedata.com/geocode/v1/json?q=${latitude},${longitude}&key=${APIkey}`;
-// fetch(url)
-// .then(res => res.json())
-// .then(data => {
-//   if(data.status.code === 200) {
-//     let currLocation = data.results[0].formatted;
-//     const locationStringArray = currLocation.split(',');
-//     if(locationStringArray[locationStringArray.length - 1] === " United States of America") {
-//         currLocation = locationStringArray.slice(2,4).join().split(' ').slice(1,3).join(' ');
-//     } 
-//     setLocationErr(false);
-//     setLocation(currLocation);
-//   } else {
-//     throw new Error(data.status.code + ' Error');
-//   }
-// })
-// .catch(error => {
-//     setLocationErr(true);
-//     setLocation(latitude + ", " + longitude);
-// });
