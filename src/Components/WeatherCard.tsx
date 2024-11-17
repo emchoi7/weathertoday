@@ -36,8 +36,8 @@ export default function WeatherCard() {
     useEffect(() => {
         if(latitude && longitude) {
             let params = {
-                "latitude": longitude,
-                "longitude": latitude,
+                "latitude": latitude,
+                "longitude": longitude,
                 "current": "temperature_2m",
                 "hourly": ["temperature_2m", "precipitation_probability"],
                 "temperature_unit": "fahrenheit",
@@ -77,10 +77,12 @@ export default function WeatherCard() {
             return <div className={"weather-card flex-column error"}><h3>{coordinatesError}</h3></div>
         }
     } else {
-        if (location) {
-            locationComponent = <Location err={null}>{location}</Location>
-        } else if (locationError) {
-            locationComponent = <Location err={locationError}>{latitude + ", " + longitude}</Location>
+        if(!locationComponent) {
+            if (location) {
+                locationComponent = <Location err={null}>{location}</Location>
+            } else if (locationError) {
+                locationComponent = <Location err={locationError}>{latitude + ", " + longitude}</Location>
+            }
         }
         
         if (weatherError) {
