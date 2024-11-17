@@ -16,7 +16,7 @@ export function useApi() {
             const processedResponse = await processResponse(response);
             setData(processedResponse);
         } catch(err:any) {
-            setError(err);
+            setError(err.toString());
         }
         setIsLoading(false);
     }, []);

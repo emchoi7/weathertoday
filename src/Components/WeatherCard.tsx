@@ -1,5 +1,4 @@
 import { useEffect } from 'react';
-import { fetchWeatherApi } from 'openmeteo';
 
 import './WeatherCard.css';
 
@@ -22,36 +21,16 @@ export type HourlyTempObject = {
 
 export default function WeatherCard() {
     const [latitude, longitude, coordinatesError, isLoadingCoordinates] = useGeolocation();
-    const [isLoadingLocation, locationError, fetchLocation, location] = useLocationData();
-    const [isLoadingWeather, weatherError, fetchWeather, currentTemp, hourlyTemps] = useWeatherData();
+    const [isLoadingLocation, locationError, location, fetchLocationData] = useLocationData();
+    const [isLoadingWeather, weatherError, currentTemp, hourlyTemps, fetchWeatherData] = useWeatherData();
 
     useEffect(() => {
         if(latitude && longitude) {
-            const APIkey = process.env.REACT_APP_REVERSE_GEO_API_KEY;
-            const url = `https://api.opencagedata.com/geocode/v1/json?q=${latitude},${longitude}&key=${APIkey}`;
-            fetchLocation(url, {});
+            fetchLocationData(latitude, longitude);
+            fetchWeatherData(latitude, longitude);
         }
     
-    }, [latitude, longitude, fetchLocation]);
-
-    useEffect(() => {
-        if(latitude && longitude) {
-            let params = {
-                "latitude": latitude,
-                "longitude": longitude,
-                "current": "temperature_2m",
-                "hourly": ["temperature_2m", "precipitation_probability"],
-                "temperature_unit": "fahrenheit",
-                "past_days": 0
-            };
-            const currDate = new Date(Date.now());
-            if(currDate.getDate() !== currDate.getUTCDate()) {
-                params["past_days"] = 1;
-            }
-            const url = "https://api.open-meteo.com/v1/forecast";
-            fetchWeather(url, params, fetchWeatherApi, (res:any) => Promise.resolve(res[0]));
-        }
-    }, [latitude, longitude, fetchWeather]);
+    }, [latitude, longitude, fetchLocationData, fetchWeatherData]);
 
     let locationComponent = null;
 
@@ -87,7 +66,7 @@ export default function WeatherCard() {
         if(!currTempComponent  && !hourlyCardComponent) {
             if (!currentTemp || !hourlyTemps) {
                 if (weatherError) {
-                    currTempComponent = <h2 className="error">{weatherError}</h2>;
+                    currTempComponent = <p className="error">{weatherError}</p>;
                     hourlyCardComponent = <HourlyCard hourlyTemps={[]} error />
                 }
             } else {

@@ -1,4 +1,4 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useCallback} from 'react';
 import { useApi } from "./useApi";
 
 export default function useLocationData() {
@@ -21,5 +21,11 @@ export default function useLocationData() {
         }
     }, [data, setError]);
 
-    return [isLoading, error, fetchApi, location];
+    const fetchLocationData = useCallback((latitude: number, longitude: number) => {
+        const APIkey = process.env.REACT_APP_REVERSE_GEO_API_KEY;
+        const url = `https://api.opencagedata.com/geocode/v1/json?q=${latitude},${longitude}&key=${APIkey}`;
+        fetchApi(url, {});
+    }, [fetchApi]);
+
+    return [isLoading, error, location, fetchLocationData];
 }

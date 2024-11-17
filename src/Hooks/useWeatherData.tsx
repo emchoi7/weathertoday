@@ -1,4 +1,5 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useCallback} from 'react';
+import { fetchWeatherApi } from 'openmeteo';
 import { useApi } from "./useApi";
 import { HourlyTempObject } from "../Components/WeatherCard";
 
@@ -54,5 +55,22 @@ export default function useWeatherData() {
         }
     }, [data, setError]);
 
-    return [isLoading, error, fetchApi, currentTemp, hourlyTemps];
+    const fetchWeatherData = useCallback((latitude: number, longitude: number) => {
+        let params = {
+            "latitude": latitude,
+            "longitude": longitude,
+            "current": "temperature_2m",
+            "hourly": ["temperature_2m", "precipitation_probability"],
+            "temperature_unit": "fahrenheit",
+            "past_days": 0
+        };
+        const currDate = new Date(Date.now());
+        if(currDate.getDate() !== currDate.getUTCDate()) {
+            params["past_days"] = 1;
+        }
+        const url = "https://api.open-meteo.com/v1/forecast";
+        fetchApi(url, params, fetchWeatherApi, (res:any) => Promise.resolve(res[0]));
+    }, [fetchApi])
+
+    return [isLoading, error, currentTemp, hourlyTemps, fetchWeatherData];
 }
