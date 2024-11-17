@@ -19,7 +19,7 @@ export default function useLocationData() {
                 setError(data.status.message);
             }
         }
-    }, [data]);
+    }, [data, setError]);
 
     return [isLoading, error, fetchApi, location];
 }

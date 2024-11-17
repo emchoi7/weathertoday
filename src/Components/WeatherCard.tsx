@@ -25,8 +25,6 @@ export default function WeatherCard() {
     const [isLoadingLocation, locationError, fetchLocation, location] = useLocationData();
     const [isLoadingWeather, weatherError, fetchWeather, currentTemp, hourlyTemps] = useWeatherData();
 
-    const currDate = new Date(Date.now());
-
     useEffect(() => {
         if(latitude && longitude) {
             const APIkey = process.env.REACT_APP_REVERSE_GEO_API_KEY;
@@ -46,6 +44,7 @@ export default function WeatherCard() {
                 "temperature_unit": "fahrenheit",
                 "past_days": 0
             };
+            const currDate = new Date(Date.now());
             if(currDate.getDate() !== currDate.getUTCDate()) {
                 params["past_days"] = 1;
             }
@@ -111,7 +110,7 @@ export default function WeatherCard() {
     
 
     return <div className={"weather-card flex-column" + bgColorClassName}>
-        <h3>{currDate.toUTCString().slice(0,11)}</h3>
+        <h3>{new Date(Date.now()).toUTCString().slice(0,11)}</h3>
         {locationComponent}
         {currTempComponent}
         {hourlyCardComponent}
