@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, createContext } from 'react';
 
 import './WeatherCard.css';
 
@@ -19,6 +19,9 @@ export type HourlyTempObject = {
     preProb: number;
 }
 
+export const locationErrorContext = createContext(null);
+export const weatherErrorContext = createContext(null);
+
 export default function WeatherCard() {
     const [latitude, longitude, coordinatesError, isLoadingCoordinates] = useGeolocation();
     const [isLoadingLocation, locationError, location, fetchLocationData] = useLocationData();
@@ -35,8 +38,6 @@ export default function WeatherCard() {
     let locationComponent = null;
 
     let bgColorClassName: string = "";
-    let currTempComponent = null;
-    let hourlyCardComponent = null;
 
     if(isLoadingCoordinates || isLoadingLocation || isLoadingWeather) {
         return <div className="weather-card flex-column"><Oval
@@ -52,46 +53,31 @@ export default function WeatherCard() {
         /></div>
     } else if(coordinatesError) {
         return <div className={"weather-card flex-column error"}><FontAwesomeIcon icon={faCircleExclamation} /><h3>{coordinatesError}</h3></div>
-    } else {
-        if(!locationComponent) {
-            if (!location) {
-                if (locationError) {
-                    locationComponent = <Location err={locationError}>{latitude + ", " + longitude}</Location>
-                }
-            } else {
-                locationComponent = <Location err={null}>{location}</Location>
-            }
-        }
+    }
         
-        if(!currTempComponent  && !hourlyCardComponent) {
-            if (!currentTemp || !hourlyTemps) {
-                if (weatherError) {
-                    currTempComponent = <p className="error">{weatherError}</p>;
-                    hourlyCardComponent = <HourlyCard hourlyTemps={[]} error />
-                }
-            } else {
-                currTempComponent = <h1>{Math.round(currentTemp)}&deg;</h1>;
-                if (currentTemp < 40) {
-                    bgColorClassName = " cold";
-                } else if (currentTemp < 55) {
-                    bgColorClassName = " cool";
-                } else if (currentTemp < 70) {
-                    bgColorClassName = " room";
-                }  else if (currentTemp < 85) {
-                    bgColorClassName = " warm";
-                }  else if (currentTemp >= 85) {
-                    bgColorClassName = " hot";
-                }
-                hourlyCardComponent = <HourlyCard hourlyTemps={hourlyTemps} error={false}/>;
-            }
+    if(currentTemp && !bgColorClassName) {
+        if (currentTemp < 40) {
+            bgColorClassName = " cold";
+        } else if (currentTemp < 55) {
+            bgColorClassName = " cool";
+        } else if (currentTemp < 70) {
+            bgColorClassName = " room";
+        }  else if (currentTemp < 85) {
+            bgColorClassName = " warm";
+        }  else if (currentTemp >= 85) {
+            bgColorClassName = " hot";
         }
     }
-    
 
-    return <div className={"weather-card flex-column" + bgColorClassName}>
-        <h3>{new Date(Date.now()).toUTCString().slice(0,11)}</h3>
-        {locationComponent}
-        {currTempComponent}
-        {hourlyCardComponent}
-    </div>
+    return <locationErrorContext.Provider value={locationError}>
+        <weatherErrorContext.Provider value={weatherError}>
+            <div className={"weather-card flex-column" + bgColorClassName}>
+                <h3>{new Date(Date.now()).toUTCString().slice(0,11)}</h3>
+                {locationComponent}
+                <Location>{location ?? latitude + ", " + longitude}</Location>
+                {weatherError ? <p className="error">{weatherError}</p> : <h1>{Math.round(currentTemp)}&deg;</h1>}
+                <HourlyCard hourlyTemps={hourlyTemps} />
+            </div>
+        </weatherErrorContext.Provider>
+    </locationErrorContext.Provider>
 }

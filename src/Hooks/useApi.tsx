@@ -10,7 +10,6 @@ export function useApi() {
     }
 
     const fetchApi = useCallback(async (url: string, options: any, fetchFcn: Function = fetch, processResponse: Function = defaultProcessResponse) => {
-        setIsLoading(true);
         try {
             const response = await fetchFcn(url, options);
             const processedResponse = await processResponse(response);

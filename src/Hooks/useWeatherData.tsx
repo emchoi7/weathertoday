@@ -70,7 +70,7 @@ export default function useWeatherData() {
         }
         const url = "https://api.open-meteo.com/v1/forecast";
         fetchApi(url, params, fetchWeatherApi, (res:any) => Promise.resolve(res[0]));
-    }, [fetchApi])
+    }, [fetchApi]);
 
     return [isLoading, error, currentTemp, hourlyTemps, fetchWeatherData];
 }

@@ -10,20 +10,20 @@ export function useGeolocation() {
         if(navigator.geolocation) {
             navigator.permissions
                 .query({name:"geolocation"})
-                .then(function (result) {
-                if(result.state === "granted") {
-                    navigator.geolocation.getCurrentPosition(getCurrentPositionSuccess, getCurrentPositionError);
-                } else if (result.state === "prompt") {
-                    navigator.geolocation.getCurrentPosition(getCurrentPositionSuccess, getCurrentPositionError);
-                } else {
-                    setError("Permission denied for geolocation.");
-                }
-                });
+                .then(result => {
+                    if(result.state === "granted") {
+                        navigator.geolocation.getCurrentPosition(getCurrentPositionSuccess, getCurrentPositionError);
+                    } else if (result.state === "prompt") {
+                        navigator.geolocation.getCurrentPosition(getCurrentPositionSuccess, getCurrentPositionError);
+                    } else {
+                        setError("Permission denied for geolocation.");
+                    }
+                })
+                .finally(() => setIsLoading(false));
         } else {
             setError("Geolocation is not supported.");
+            setIsLoading(false);
         }
-
-        setIsLoading(false);
 
         const getCurrentPositionSuccess = (pos:GeolocationPosition) => {
             setLatitude(pos.coords.latitude);
