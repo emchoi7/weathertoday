@@ -23,15 +23,34 @@ export default function useWeatherData() {
             const hourlyPreProbs: Float32Array = hourly?.variables(1)!.valuesArray()!;
             
             let newHourlyTemps: HourlyTempObject[] = [];
-            for(let i = 0; i < hourlyTime.length; i++) {
-                if(hourlyTime 
+            // for(let i = 0; i < hourlyTime.length; i++) {
+            //     if(hourlyTime 
+            //         && hourlyTime[i].getDate() === currDate.getDate()
+            //     )
+            //     newHourlyTemps.push({
+            //             time: hourlyTime[i],
+            //             temp: hourlyTemps[i],
+            //             preProb: hourlyPreProbs[i]
+            //     });
+            // }
+            /*
+            * The api returns the 0th hour of the day that GMT+0 is on
+            * Find the day that user's system is on, find the 0th hour of that day
+            * Return 24 hours from there
+            */
+           for(let i = 0; i < hourlyTime.length; i++) {
+                if(hourlyTime
                     && hourlyTime[i].getDate() === currDate.getDate()
-                )
-                newHourlyTemps.push({
-                        time: hourlyTime[i],
-                        temp: hourlyTemps[i],
-                        preProb: hourlyPreProbs[i]
-                });
+                ) {
+                    for(let j = i; j < i+24; j++) {
+                        newHourlyTemps.push({
+                            time: hourlyTime[j],
+                            temp: hourlyTemps[j],
+                            preProb: hourlyPreProbs[j]
+                        });
+                    }
+                    break;
+                }
             }
             sethourlyTemps(newHourlyTemps);
         }

@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { fetchWeatherApi } from 'openmeteo';
 
 import './WeatherCard.css';
@@ -10,6 +10,9 @@ import { Oval } from 'react-loader-spinner';
 import useWeatherData from '../Hooks/useWeatherData';
 import useLocationData from '../Hooks/useLocationData';
 import { useGeolocation } from '../Hooks/useGeolocation';
+
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons';
 
 export type HourlyTempObject = {
     time: Date;
@@ -41,7 +44,6 @@ export default function WeatherCard() {
                 "current": "temperature_2m",
                 "hourly": ["temperature_2m", "precipitation_probability"],
                 "temperature_unit": "fahrenheit",
-                "forecast_days": 1,
                 "past_days": 0
             };
             if(currDate.getDate() !== currDate.getUTCDate()) {
@@ -58,7 +60,7 @@ export default function WeatherCard() {
     let currTempComponent = null;
     let hourlyCardComponent = null;
 
-    if(!location || !currentTemp || !hourlyTemps) {
+    if(isLoadingCoordinates || isLoadingLocation || isLoadingWeather) {
         return <div className="weather-card flex-column"><Oval
             visible={true}
             height="80"
@@ -70,27 +72,26 @@ export default function WeatherCard() {
             wrapperStyle={{}}
             wrapperClass=""
         /></div>
-    }
-    
-    if(!latitude || !longitude) {
-        if(coordinatesError) {
-            return <div className={"weather-card flex-column error"}><h3>{coordinatesError}</h3></div>
-        }
+    } else if(coordinatesError) {
+        return <div className={"weather-card flex-column error"}><FontAwesomeIcon icon={faCircleExclamation} /><h3>{coordinatesError}</h3></div>
     } else {
         if(!locationComponent) {
-            if (location) {
+            if (!location) {
+                if (locationError) {
+                    locationComponent = <Location err={locationError}>{latitude + ", " + longitude}</Location>
+                }
+            } else {
                 locationComponent = <Location err={null}>{location}</Location>
-            } else if (locationError) {
-                locationComponent = <Location err={locationError}>{latitude + ", " + longitude}</Location>
             }
         }
         
-        if (weatherError) {
-            currTempComponent = <h2 className="error">{weatherError}</h2>;
-            hourlyCardComponent = <HourlyCard hourlyTemps={[]} error />
-        } 
-        else {
-            if(currentTemp) {
+        if(!currTempComponent  && !hourlyCardComponent) {
+            if (!currentTemp || !hourlyTemps) {
+                if (weatherError) {
+                    currTempComponent = <h2 className="error">{weatherError}</h2>;
+                    hourlyCardComponent = <HourlyCard hourlyTemps={[]} error />
+                }
+            } else {
                 currTempComponent = <h1>{Math.round(currentTemp)}&deg;</h1>;
                 if (currentTemp < 40) {
                     bgColorClassName = " cold";
@@ -103,8 +104,6 @@ export default function WeatherCard() {
                 }  else if (currentTemp >= 85) {
                     bgColorClassName = " hot";
                 }
-            }
-            if(hourlyTemps) {
                 hourlyCardComponent = <HourlyCard hourlyTemps={hourlyTemps} error={false}/>;
             }
         }
