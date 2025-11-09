@@ -10,10 +10,10 @@ export default function HourlyCard(props: { hourlyTemps: Array<HourlyTempObject>
     const currentRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        if(currentRef.current) {
+        if(currentRef.current && !error) {
             currentRef.current.scrollIntoView();
         }
-    }, []);
+    }, [error]);
 
     if(error) {
         return <div className="hourly-card error">

@@ -7,14 +7,10 @@ export default function useLocationData() {
 
     useEffect(() => {
         if(data) {
-            let currLocation: string;
             if(data.status.code === 200) {
-                currLocation = data.results[0].formatted;
-                const locationStringArray = currLocation.split(',');
-                if(locationStringArray[locationStringArray.length - 1] === " United States of America") {
-                    currLocation = locationStringArray.slice(2,4).join().split(' ').slice(1,3).join(' ');
-                }
-                setLocation(currLocation);
+                const currCity = data.results[0].components.city;
+                const currState = data.results[0].components.state_code;
+                setLocation(currCity + ", " + currState);
             } else {
                 setError(data.status.message);
             }
